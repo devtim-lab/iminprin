@@ -33,6 +33,9 @@
   .reset {
     margin-top: 12px; background: #c62828; font-size: 16px; padding: 10px;
   }
+  .apk {
+    margin-top: 12px; background: #1565c0; font-size: 16px; padding: 10px;
+  }
   .hint { margin-top: 18px; font-size: 13px; color: #999; }
 
   /* ====== area tiket (hanya muncul saat print) ====== */
@@ -59,7 +62,8 @@
   <div class="nomor" id="nomorNow">A-000</div>
   <button onclick="ambilNomor()">🎫 AMBIL NOMOR</button>
   <button class="reset" onclick="resetNomor()">RESET ANTRIAN HARI INI</button>
-  <div class="hint">Tiket akan langsung tercetak ke printer iMin 80mm</div>
+  <button class="apk" onclick="location.href='https://github.com/devtim-lab/iminprin/releases/latest'">⬇️ DOWNLOAD APK (PRINT TANPA DIALOG)</button>
+  <div class="hint">Tiket akan langsung tercetak ke printer iMin 80mm.<br>Install APK untuk print tanpa dialog.</div>
 </div>
 
 <!-- Tiket thermal (muncul hanya saat print) -->
