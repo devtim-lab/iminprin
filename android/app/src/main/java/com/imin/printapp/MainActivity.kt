@@ -1,10 +1,17 @@
 package com.imin.printapp
 
 import android.annotation.SuppressLint
+import android.app.DownloadManager
+import android.app.AlertDialog
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.view.View
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
@@ -12,8 +19,14 @@ import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import com.imin.printer.INeoPrinterCallback
 import com.imin.printer.PrinterHelper
+import org.json.JSONObject
+import java.io.File
+import java.net.HttpURLConnection
+import java.net.URL
+import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
 
@@ -57,8 +70,86 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+        checkForUpdate()
     }
 
+    // ================= AUTO UPDATE =================
+    // Cek rilis terbaru di GitHub; kalau lebih baru, download + minta install.
+    private fun checkForUpdate() {
+        thread {
+            try {
+                val conn = URL("https://api.github.com/repos/devtim-lab/iminprin/releases/latest")
+                    .openConnection() as HttpURLConnection
+                conn.connectTimeout = 10000
+                val json = JSONObject(conn.inputStream.bufferedReader().readText())
+                val latest = json.getString("tag_name").removePrefix("v")
+                if (!isNewerVersion(latest, BuildConfig.VERSION_NAME)) return@thread
+
+                val assets = json.getJSONArray("assets")
+                var apkUrl: String? = null
+                for (i in 0 until assets.length()) {
+                    val a = assets.getJSONObject(i)
+                    if (a.getString("name").endsWith(".apk")) apkUrl = a.getString("browser_download_url")
+                }
+                if (apkUrl == null) return@thread
+
+                runOnUiThread {
+                    AlertDialog.Builder(this)
+                        .setTitle("Update tersedia (v$latest)")
+                        .setMessage("Versi baru APK tersedia. Update sekarang?")
+                        .setPositiveButton("UPDATE") { _, _ -> downloadUpdate(apkUrl, latest) }
+                        .setNegativeButton("Nanti", null)
+                        .show()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace() // offline / limit API -> abaikan saja
+            }
+        }
+    }
+
+    private fun downloadUpdate(apkUrl: String, version: String) {
+        val dir = File(cacheDir, "updates").apply { mkdirs() }
+        val file = File(dir, "iminprint-$version.apk")
+        val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        val req = DownloadManager.Request(Uri.parse(apkUrl))
+            .setTitle("Update iMin Print v$version")
+            .setDestinationUri(Uri.fromFile(file))
+            .setAllowedOverMetered(true)
+            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        val id = dm.enqueue(req)
+
+        registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1) == id) {
+                    unregisterReceiver(this)
+                    installApk(file)
+                }
+            }
+        }, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+    }
+
+    private fun installApk(file: File) {
+        val uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(uri, "application/vnd.android.package-archive")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        startActivity(intent)
+    }
+
+    private fun isNewerVersion(latest: String, current: String): Boolean {
+        fun parts(v: String) = v.split(".").map { it.toIntOrNull() ?: 0 }
+        val l = parts(latest); val c = parts(current)
+        val n = maxOf(l.size, c.size)
+        for (i in 0 until n) {
+            val a = l.getOrElse(i) { 0 }; val b = c.getOrElse(i) { 0 }
+            if (a != b) return a > b
+        }
+        return false
+    }
+
+    // ================= PRINT =================
     inner class PrinterBridge {
         @JavascriptInterface
         fun printTicket(html: String) {
