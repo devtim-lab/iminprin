@@ -13,3 +13,7 @@ Aplikasi web print thermal 80mm untuk iMin D4 504 Pro (Android 13).
 
 ## Pemakaian di perangkat iMin
 Buka URL hasil deploy di Chrome iMin → pilih printer "iMin" saat dialog print muncul (centang "set as default").
+
+## Project Android (`android/`)
+APK wrapper WebView + IminPrinterSDK: print langsung tanpa dialog, auto-cut.
+Build: buka `android/` di Android Studio, atau `./gradlew assembleDebug`.
