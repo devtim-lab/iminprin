@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Struk Demo 80mm - iMin D4</title>
+<style>
+  @page { size: 80mm auto; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 72mm;              /* area cetak aman 80mm */
+    margin: 0 auto;
+    font-family: monospace;
+    font-size: 12px;
+    color: #000;
+    padding: 4mm 2mm;
+  }
+  .center { text-align: center; }
+  .bold { font-weight: bold; }
+  .big { font-size: 18px; }
+  hr { border: none; border-top: 1px dashed #000; margin: 6px 0; }
+  table { width: 100%; border-collapse: collapse; }
+  td { padding: 1px 0; vertical-align: top; }
+  .r { text-align: right; white-space: nowrap; }
+  .total td { font-weight: bold; font-size: 14px; border-top: 1px solid #000; padding-top: 4px; }
+  .actions { text-align: center; margin: 10px 0; }
+  button { font-size: 14px; padding: 8px 16px; }
+  @media print { .actions { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="actions">
+  <button onclick="window.print()">🖨️ PRINT</button>
+</div>
+
+<div class="center bold big">TOKO MAKMUR JAYA</div>
+<div class="center">Jl. Merdeka No. 45, Jakarta</div>
+<div class="center">Telp: 021-5551234</div>
+<hr>
+<div>No. Struk : INV-20260910-001</div>
+<div>Kasir     : Budi</div>
+<div>Tanggal   : 10-09-2026 08:15</div>
+<hr>
+<table>
+  <tr>
+    <td class="bold">Item</td>
+    <td class="bold r">Qty</td>
+    <td class="bold r">Harga</td>
+    <td class="bold r">Subtotal</td>
+  </tr>
+  <tr><td colspan="4"><hr></td></tr>
+  <tr>
+    <td>Kopi Susu Gula Aren</td>
+    <td class="r">2</td>
+    <td class="r">15.000</td>
+    <td class="r">30.000</td>
+  </tr>
+  <tr>
+    <td>Roti Bakar Coklat</td>
+    <td class="r">1</td>
+    <td class="r">12.000</td>
+    <td class="r">12.000</td>
+  </tr>
+  <tr>
+    <td>Nasi Goreng Spesial</td>
+    <td class="r">1</td>
+    <td class="r">25.000</td>
+    <td class="r">25.000</td>
+  </tr>
+</table>
+<hr>
+<table>
+  <tr><td>Subtotal</td><td class="r">Rp   67.000</td></tr>
+  <tr><td>Diskon</td><td class="r">Rp   (5.000)</td></tr>
+  <tr class="total"><td>TOTAL</td><td class="r">Rp   62.000</td></tr>
+  <tr><td>Tunai</td><td class="r">Rp  100.000</td></tr>
+  <tr><td>Kembali</td><td class="r">Rp   38.000</td></tr>
+</table>
+<hr>
+<div class="center">Terima kasih telah berbelanja!</div>
+<div class="center">-- Barang yang sudah dibeli --</div>
+<div class="center">-- tidak dapat ditukar --</div>
+<div class="center" style="margin-top:8px;">
+  <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=INV-20260910-001" width="120">
+</div>
+<div class="center">INV-20260910-001</div>
+<br><br><br>
+
+</body>
+</html>
