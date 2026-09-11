@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nomor Antrian - iMin D4</title>
+<style>
+  @page { size: 80mm auto; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: #1565c0; color: #fff;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .card {
+    background: #fff; color: #333; border-radius: 20px;
+    padding: 40px; text-align: center; width: 90%; max-width: 480px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.3);
+  }
+  .card h1 { font-size: 22px; margin-bottom: 8px; color: #1565c0; }
+  .nomor {
+    font-size: 110px; font-weight: 800; color: #1565c0;
+    line-height: 1.1; margin: 10px 0;
+  }
+  .info { font-size: 18px; margin-bottom: 24px; color: #666; }
+  button {
+    font-size: 24px; font-weight: bold; color: #fff;
+    background: #2e7d32; border: none; border-radius: 14px;
+    padding: 18px 40px; cursor: pointer; width: 100%;
+  }
+  button:active { transform: scale(.97); }
+  .reset {
+    margin-top: 12px; background: #c62828; font-size: 16px; padding: 10px;
+  }
+  .apk {
+    margin-top: 12px; background: #1565c0; font-size: 16px; padding: 10px;
+  }
+  .hint { margin-top: 18px; font-size: 13px; color: #999; }
+
+  /* ====== area tiket (hanya muncul saat print) ====== */
+  #tiket { display: none; }
+  #tiket .kertas {
+    width: 72mm; margin: 0 auto; padding: 4mm 2mm;
+    font-family: monospace; font-size: 14px; color: #000; text-align: center;
+  }
+  #tiket .big { font-size: 64px; font-weight: 800; margin: 8px 0; }
+  #tiket .loket { font-size: 20px; font-weight: bold; margin: 6px 0; }
+  #tiket hr { border: none; border-top: 2px dashed #000; margin: 8px 0; }
+  @media print {
+    body { background: #fff; }
+    .card { display: none; }
+    #tiket { display: block; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>LOKET PENDAFTARAN</h1>
+  <div class="info">Nomor antrian saat ini</div>
+  <div class="nomor" id="nomorNow">A-000</div>
+  <button onclick="ambilNomor()">🎫 AMBIL NOMOR</button>
+  <button class="reset" onclick="resetNomor()">RESET ANTRIAN HARI INI</button>
+  <button class="apk" onclick="location.href='https://github.com/devtim-lab/iminprin/releases/latest'">⬇️ DOWNLOAD APK (PRINT TANPA DIALOG)</button>
+  <div class="hint">Tiket akan langsung tercetak ke printer iMin 80mm.<br>Install APK untuk print tanpa dialog.</div>
+</div>
+
+<!-- Tiket thermal (muncul hanya saat print) -->
+<div id="tiket">
+  <div class="kertas">
+    <div style="font-size:18px;font-weight:bold;">RS SEHAT SENTOSA</div>
+    <div>Jl. Merdeka No. 45, Jakarta</div>
+    <hr>
+    <div>NOMOR ANTRIAN ANDA</div>
+    <div class="big" id="tiketNomor">A-001</div>
+    <div class="loket">LOKET 1</div>
+    <hr>
+    <div id="tiketWaktu">-</div>
+    <div>Silakan menunggu panggilan</div>
+    <div>Terima kasih</div>
+    <br><br>
+  </div>
+</div>
+
+<script>
+  const KEY = 'antrian_' + new Date().toISOString().slice(0,10); // reset tiap hari
+
+  function getNomor() { return parseInt(localStorage.getItem(KEY) || '0', 10); }
+  function setNomor(n) { localStorage.setItem(KEY, n); document.getElementById('nomorNow').textContent = 'A-' + String(n).padStart(3,'0'); }
+
+  setNomor(getNomor());
+
+  // Print langsung via app iMin (tanpa dialog); fallback window.print di browser
+  function cetak(el) {
+    if (typeof Android !== 'undefined') {
+      Android.printTicket(el.outerHTML);
+    } else {
+      window.print();
+    }
+  }
+
+  function ambilNomor() {
+    const n = getNomor() + 1;
+    setNomor(n);
+    document.getElementById('tiketNomor').textContent = 'A-' + String(n).padStart(3,'0');
+    document.getElementById('tiketWaktu').textContent = new Date().toLocaleString('id-ID');
+    setTimeout(() => cetak(document.getElementById('tiket')), 100); // beri waktu DOM update
+  }
+
+  function resetNomor() {
+    if (confirm('Reset nomor antrian ke 0?')) { setNomor(0); }
+  }
+</script>
+
+</body>
+</html>
